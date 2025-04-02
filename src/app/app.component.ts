@@ -59,16 +59,30 @@ import { AuthService } from './auth/auth.service';
   `,
   styles: [`
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;500;600;700&display=swap');
 
     :host {
       display: block;
-      font-family: 'Ubuntu', sans-serif;
+      font-family: 'Montserrat Alternates', sans-serif;
+      scroll-behavior: smooth;
     }
 
     .app-container {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3') center/cover fixed;
+    }
+
+    .app-container::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 32, 0, 0.6);
+      z-index: 0;
     }
 
     .navbar {
@@ -132,6 +146,25 @@ import { AuthService } from './auth/auth.service';
     main {
       flex: 1;
       margin-top: 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      min-height: 100vh;
+      padding: 6rem 2rem;
+      position: relative;
+      transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+    }
+
+    section:target {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    section:not(:target) {
+      transform: translateY(20px);
+      opacity: 0.8;
     }
 
     .footer {

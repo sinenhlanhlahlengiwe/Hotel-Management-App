@@ -63,8 +63,13 @@ import { map } from 'rxjs/operators';
 
     .rooms-section {
       padding: 4rem 2rem;
-      background: rgba(0, 64, 0, 0.05);
+      background: rgba(0, 64, 0, 0.85);
       min-height: 100vh;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      margin: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 32, 0, 0.1);
     }
 
     .filter-container {
@@ -73,10 +78,13 @@ import { map } from 'rxjs/operators';
     }
 
     .filter-box {
-      background: rgba(0, 64, 0, 0.9);
+      background: linear-gradient(135deg, rgba(0, 100, 0, 0.9), rgba(0, 64, 0, 0.95));
       padding: 2rem;
-      border-radius: 10px;
+      border-radius: 15px;
       color: #e0f2e0;
+      border: 1px solid rgba(144, 238, 144, 0.2);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 32, 0, 0.15);
     }
 
     .filter-box h3 {
@@ -114,15 +122,19 @@ import { map } from 'rxjs/operators';
     }
 
     .room-card {
-      background: white;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
       overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 32, 0, 0.15);
+      transition: all 0.4s ease;
+      border: 1px solid rgba(144, 238, 144, 0.3);
+      backdrop-filter: blur(8px);
     }
 
     .room-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 32, 0, 0.2);
+      border-color: rgba(144, 238, 144, 0.5);
     }
 
     .room-image {
@@ -136,11 +148,15 @@ import { map } from 'rxjs/operators';
       position: absolute;
       top: 1rem;
       right: 1rem;
-      background: rgba(0, 100, 0, 0.9);
+      background: linear-gradient(135deg, #006400, #008000);
       color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
       font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0, 32, 0, 0.2);
+      border: 1px solid rgba(144, 238, 144, 0.3);
     }
 
     .room-details {
