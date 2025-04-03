@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, Auth, User } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, Auth, User } from 'firebase/auth';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const firebaseConfig = {
@@ -52,6 +52,21 @@ export class AuthService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async resetPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  getUserRole(): string {
+    const user = this.auth.currentUser;
+    // In a real application, you would fetch the user's role from Firestore
+    // For now, we'll return a default role
+    return user ? 'guest' : '';
   }
 
   isAuthenticated(): Observable<boolean> {
