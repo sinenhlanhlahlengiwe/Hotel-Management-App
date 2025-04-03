@@ -12,16 +12,16 @@ import { AuthService } from './auth/auth.service';
       <nav class="navbar">
         <div class="nav-brand">Four Seasons SA</div>
         <div class="nav-links">
-          <a href="#home">Home</a>
-          <a href="#rooms">Rooms</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+          <a routerLink="/">Home</a>
+          <a routerLink="/rooms">Rooms</a>
+          <a routerLink="/about">About</a>
+          <a routerLink="/contact">Contact</a>
           <ng-container *ngIf="!(isLoggedIn$ | async)">
-            <a href="/login" class="auth-link">Login</a>
-            <a href="/register" class="auth-link">Register</a>
+            <a routerLink="/login" class="auth-link">Login</a>
+            <a routerLink="/register" class="auth-link">Register</a>
           </ng-container>
           <ng-container *ngIf="isLoggedIn$ | async">
-            <a href="/profile" class="auth-link">Profile</a>
+            <a routerLink="/profile" class="auth-link">Profile</a>
             <button (click)="logout()" class="logout-btn">Logout</button>
           </ng-container>
         </div>
@@ -227,11 +227,12 @@ import { AuthService } from './auth/auth.service';
   `]
 })
 export class AppComponent implements OnInit {
-  isLoggedIn$ = this.authService.isAuthenticated();
+  isLoggedIn$: any;
 
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
+    this.isLoggedIn$ = this.authService.isAuthenticated();
     document.documentElement.style.scrollBehavior = 'smooth';
   }
 

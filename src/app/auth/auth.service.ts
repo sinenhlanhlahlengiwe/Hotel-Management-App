@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, Auth } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, Auth, User } from 'firebase/auth';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const firebaseConfig = {
@@ -18,14 +18,14 @@ const firebaseConfig = {
 })
 export class AuthService {
   private auth: Auth;
-  private userSubject = new BehaviorSubject<any>(null);
+  private userSubject = new BehaviorSubject<User | null>(null);
   user$ = this.userSubject.asObservable();
 
   constructor() {
     const app = initializeApp(firebaseConfig);
     this.auth = getAuth(app);
     
-    this.auth.onAuthStateChanged(user => {
+    this.auth.onAuthStateChanged((user: User | null) => {
       this.userSubject.next(user);
     });
   }
@@ -56,7 +56,7 @@ export class AuthService {
 
   isAuthenticated(): Observable<boolean> {
     return new Observable(subscriber => {
-      this.auth.onAuthStateChanged(user => {
+      this.auth.onAuthStateChanged((user: User | null) => {
         subscriber.next(!!user);
       });
     });
