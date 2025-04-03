@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, RouterLink],
   template: `
     <div class="app-container">
       <nav class="navbar">
@@ -39,7 +39,7 @@ import { AuthService } from './auth/auth.service';
           </div>
           <div class="footer-section">
             <h3>Contact Us</h3>
-            <p>Email: info@fourseasonssa.com</p>
+            <p>Email: info&#64;fourseasonssa.com</p>
             <p>Phone: +27 11 123 4567</p>
           </div>
           <div class="footer-section">
