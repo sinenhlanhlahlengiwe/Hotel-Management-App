@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -33,7 +33,7 @@ import { Booking } from '../../shared/models/interfaces';
             <p><strong>Member Since:</strong> {{user.metadata?.creationTime | date}}</p>
           </div>
 
-          <mat-tabs>
+<mat-tab-group>
             <mat-tab label="My Bookings">
               <div class="bookings-list">
                 <div *ngIf="bookings.length === 0" class="no-bookings">
@@ -54,12 +54,12 @@ import { Booking } from '../../shared/models/interfaces';
                     <p><strong>Total Price:</strong> R{{booking.totalPrice}}</p>
                   </mat-card-content>
                   <mat-card-actions *ngIf="booking.status === 'pending'">
-                    <button mat-button color="warn" (click)="cancelBooking(booking.id)">Cancel Booking</button>
+                    <button mat-button color="warn" (click)="cancelBooking(booking.id!)">Cancel Booking</button>
                   </mat-card-actions>
                 </mat-card>
               </div>
             </mat-tab>
-          </mat-tabs>
+          </mat-tab-group>
         </mat-card-content>
       </mat-card>
     </div>
@@ -113,11 +113,11 @@ export class ProfileComponent implements OnInit {
   user: any;
   bookings: Booking[] = [];
 
-  constructor(
-    private firebaseService: FirebaseService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar
-  ) {}
+  private firebaseService = inject(FirebaseService);
+  private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
+
+  constructor() {}
 
   ngOnInit() {
     this.loadUserProfile();
@@ -125,14 +125,15 @@ export class ProfileComponent implements OnInit {
   }
 
   private async loadUserProfile() {
-    this.user = this.authService.auth.currentUser;
+    this.user = this.authService.getCurrentUser();
   }
 
   private async loadUserBookings() {
     try {
-      const userId = this.authService.auth.currentUser?.uid;
+      const userId = this.authService.getCurrentUserId();
       if (userId) {
-        this.bookings = await this.firebaseService.getUserBookings(userId);
+const bookings = await this.firebaseService.getUserBookings(userId).toPromise();
+this.bookings = bookings ?? [];
       }
     } catch (error) {
       this.snackBar.open('Error loading bookings', 'Close', { duration: 3000 });
@@ -141,7 +142,7 @@ export class ProfileComponent implements OnInit {
 
   async cancelBooking(bookingId: string) {
     try {
-      await this.firebaseService.updateBookingStatus(bookingId, 'cancelled');
+      await this.firebaseService.updateBooking(bookingId, { status: 'cancelled' });
       this.snackBar.open('Booking cancelled successfully', 'Close', { duration: 3000 });
       this.loadUserBookings();
     } catch (error) {

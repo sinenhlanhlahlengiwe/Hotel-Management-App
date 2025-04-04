@@ -1,5 +1,4 @@
-t import { Routes } from '@angular/router';
-ou
+import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',

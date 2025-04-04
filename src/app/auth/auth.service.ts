@@ -21,6 +21,14 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   user$ = this.userSubject.asObservable();
 
+  getCurrentUserId(): string | undefined {
+    return this.auth.currentUser?.uid;
+  }
+
+  getCurrentUser(): User | null {
+    return this.auth.currentUser;
+  }
+
   constructor() {
     const app = initializeApp(firebaseConfig);
     this.auth = getAuth(app);

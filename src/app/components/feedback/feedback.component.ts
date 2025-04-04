@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatRatingModule } from '@angular/material/slider';
+import { MatSliderModule } from '@angular/material/slider';
+import { firstValueFrom } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FirebaseService } from '../../shared/services/firebase.service';
 import { AuthService } from '../../auth/auth.service';
@@ -24,7 +25,7 @@ import { Feedback } from '../../shared/models/interfaces';
     MatInputModule,
     MatButtonModule,
     MatSnackBarModule,
-    MatRatingModule
+    MatSliderModule
   ],
   template: `
     <div class="feedback-container">
@@ -95,12 +96,12 @@ export class FeedbackComponent implements OnInit {
   feedbacks: Feedback[] = [];
   isAuthenticated = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private firebaseService: FirebaseService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar
-  ) {
+  private snackBar = inject(MatSnackBar);
+  private fb = inject(FormBuilder);
+  private firebaseService = inject(FirebaseService);
+  private authService = inject(AuthService);
+
+  constructor() {
     this.feedbackForm = this.fb.group({
       rating: ['', [Validators.required, Validators.min(1), Validators.max(5)]],
       comment: ['', [Validators.required, Validators.minLength(10)]]
@@ -117,7 +118,8 @@ export class FeedbackComponent implements OnInit {
   async loadFeedbacks() {
     try {
       // Assuming getRoomFeedback is modified to get all feedbacks if no roomId is provided
-      this.feedbacks = await this.firebaseService.getRoomFeedback('all').toPromise();
+      const feedbacks = await firstValueFrom(this.firebaseService.getRoomFeedback('all'));
+      this.feedbacks = feedbacks || [];
     } catch (error) {
       this.snackBar.open('Error loading feedbacks', 'Close', { duration: 3000 });
     }
@@ -128,7 +130,7 @@ export class FeedbackComponent implements OnInit {
       try {
         const feedback: Feedback = {
           ...this.feedbackForm.value,
-          userId: this.authService.auth.currentUser?.uid,
+          userId: this.authService.getCurrentUserId(),
           createdAt: new Date().toISOString()
         };
 
