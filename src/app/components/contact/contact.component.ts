@@ -28,8 +28,10 @@ import { FormsModule } from '@angular/forms';
         <div class="contact-info">
           <h3>Other Ways to Reach Us</h3>
           <p><strong>Address:</strong> 123 Hotel Street, Pretoria, South Africa</p>
-          <p><strong>Phone:</strong> +27 12 345 6789</p>
-          <p><strong>Email:</strong> info@hotelmanagement.co.za</p>
+
+          <p><strong>Phone:</strong> +27 12 345 6789 </p>
+
+          <p><strong>Email:</strong> info&#64;hotelmanagement.co.za</p>
         </div>
       </div>
     </div>
