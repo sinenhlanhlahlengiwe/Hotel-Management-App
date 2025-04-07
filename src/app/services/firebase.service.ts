@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 interface Room {
   id?: string;
@@ -31,12 +32,13 @@ interface Booking {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBZrWFgxVlFHdDXuXe8hnXvhOXvMNnPyXk",
-  authDomain: "hotel-management-app-sa.firebaseapp.com",
-  projectId: "hotel-management-app-sa",
-  storageBucket: "hotel-management-app-sa.appspot.com",
-  messagingSenderId: "654321098765",
-  appId: "1:654321098765:web:abcdef123456789"
+  apiKey: "AIzaSyBRjiHTyFos-6nuu9fui798hqakwxk_5MI",
+  authDomain: "hotel-management-app-413f9.firebaseapp.com",
+  projectId: "hotel-management-app-413f9",
+  storageBucket: "hotel-management-app-413f9.firebasestorage.app",
+  messagingSenderId: "787225024162",
+  appId: "1:787225024162:web:97fa9f6167954a335ae9fb",
+  measurementId: "G-6W5NFWFJGB"
 };
 
 @Injectable({
@@ -46,6 +48,7 @@ export class FirebaseService {
   private app = initializeApp(firebaseConfig);
   private auth = getAuth(this.app);
   private db = getFirestore(this.app);
+  private storage = getStorage(this.app);
 
   // Authentication methods
   async register(email: string, password: string) {
@@ -75,6 +78,28 @@ export class FirebaseService {
   }
 
   // Room management methods
+  async uploadRoomImage(file: File, roomId: string): Promise<string> {
+    try {
+      const fileRef = ref(this.storage, `rooms/${roomId}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      return downloadURL;
+    } catch (error: any) {
+      console.error('Error uploading image:', error.message);
+      throw new Error(`Failed to upload image: ${error.message}`);
+    }
+  }
+
+  async deleteRoomImage(imageUrl: string): Promise<void> {
+    try {
+      const fileRef = ref(this.storage, imageUrl);
+      await deleteObject(fileRef);
+    } catch (error: any) {
+      console.error('Error deleting image:', error.message);
+      throw new Error(`Failed to delete image: ${error.message}`);
+    }
+  }
+
   async addRoom(roomData: Room) {
     try {
       if (!roomData.number || !roomData.type || !roomData.price) {
@@ -84,7 +109,8 @@ export class FirebaseService {
       const docRef = await addDoc(roomsRef, {
         ...roomData,
         createdAt: new Date().toISOString(),
-        isAvailable: true
+        isAvailable: true,
+        images: roomData.images || []
       });
       return { id: docRef.id, ...roomData };
     } catch (error: any) {

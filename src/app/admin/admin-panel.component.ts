@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FirebaseService } from '../services/firebase.service';
 import { Room } from '../shared/models/interfaces';
+import { getStorage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatProgressSpinnerModule],
   template: `
     <div class="admin-container">
       <div class="admin-sidebar">
@@ -44,7 +47,17 @@ import { Room } from '../shared/models/interfaces';
               <div class="form-group">
                 <textarea [(ngModel)]="newRoom.description" name="description" placeholder="Room Description" required></textarea>
               </div>
-              <button type="submit" [disabled]="!roomForm.valid">Add Room</button>
+              <div class="form-group">
+                <label for="room-images">Room Images</label>
+                <input type="file" id="room-images" (change)="onFileSelected($event)" multiple accept="image/*">
+                <div class="selected-files" *ngIf="selectedFiles">
+                  Selected files: {{selectedFiles.length}}
+                </div>
+              </div>
+              <button type="submit" [disabled]="!roomForm.valid || isLoading">
+                <mat-spinner *ngIf="isLoading" [diameter]="20"></mat-spinner>
+                <span *ngIf="!isLoading">Add Room</span>
+              </button>
             </form>
           </div>
 
@@ -53,6 +66,12 @@ import { Room } from '../shared/models/interfaces';
             <h4>Existing Rooms</h4>
             <div class="room-grid">
               <div *ngFor="let room of rooms" class="room-card">
+                <div class="room-images" *ngIf="room.images && room.images.length > 0">
+                  <img [src]="room.images[0]" [alt]="'Room ' + room.number" class="room-image">
+                </div>
+                <div class="room-placeholder" *ngIf="!room.images || room.images.length === 0">
+                  <span>No image available</span>
+                </div>
                 <h5>Room {{room.number}}</h5>
                 <p>Type: {{room.type}}</p>
                 <p>Price: ${{room.price}}/night</p>
@@ -92,6 +111,42 @@ import { Room } from '../shared/models/interfaces';
     </div>
   `,
   styles: [`
+    .room-images {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .room-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .room-placeholder {
+      width: 100%;
+      height: 200px;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .selected-files {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    mat-spinner {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
     .admin-container {
       display: flex;
       min-height: 100vh;
@@ -251,7 +306,8 @@ export class AdminPanelComponent implements OnInit {
     number: '',
     type: '',
     price: 0,
-    description: ''
+    description: '',
+    images: []
   };
 
   constructor(private firebaseService: FirebaseService) {}
@@ -285,14 +341,34 @@ export class AdminPanelComponent implements OnInit {
 
   async addRoom() {
     try {
+      if (this.selectedFiles && this.selectedFiles.length > 0) {
+        const storage = getStorage();
+        const imageUrls = [];
+        
+        for (const file of this.selectedFiles) {
+          const storageRef = ref(storage, `rooms/${this.newRoom.type.toLowerCase()}/${file.name}`);
+          await uploadBytes(storageRef, file);
+          const downloadUrl = await getDownloadURL(storageRef);
+          imageUrls.push(downloadUrl);
+        }
+        
+        this.newRoom.images = imageUrls;
+      } else {
+        // Use default room type images if no files are selected
+        const defaultImage = `/assets/images/${this.newRoom.type.toLowerCase()}-room.svg`;
+        this.newRoom.images = [defaultImage];
+      }
+      
       await this.firebaseService.addRoom(this.newRoom);
       await this.loadRooms();
       this.newRoom = {
         number: '',
         type: '',
         price: 0,
-        description: ''
+        description: '',
+        images: []
       };
+      this.selectedFiles = null;
     } catch (error) {
       console.error('Error adding room:', error);
     }

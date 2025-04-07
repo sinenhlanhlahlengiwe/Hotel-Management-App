@@ -12,7 +12,7 @@ import { PaymentService } from '../../services/payment.service';
       <h2>Payment Details</h2>
       <div class="payment-form">
         <div class="amount-display">
-          <p>Total Amount: ${{ amount }}</p>
+          <p>Total Amount: R{{ amount }}</p>
         </div>
 
         <div id="payment-element">

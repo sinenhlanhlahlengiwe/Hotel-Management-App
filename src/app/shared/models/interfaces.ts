@@ -1,6 +1,8 @@
+import { RoomType } from "../services/room-images.service";
+
 export interface Room {
   id?: string;
-  type: string;
+  type: RoomType;
   price: number;
   capacity: number;
   amenities: string[];

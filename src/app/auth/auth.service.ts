@@ -1,87 +1,48 @@
 import { Injectable } from '@angular/core';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, Auth, User } from 'firebase/auth';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-const firebaseConfig = {
-  // Replace with your Firebase config
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, User, sendPasswordResetEmail } from '@angular/fire/auth';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private auth: Auth;
-  private userSubject = new BehaviorSubject<User | null>(null);
-  user$ = this.userSubject.asObservable();
+  private currentUser: User | null = null;
 
-  getCurrentUserId(): string | undefined {
-    return this.auth.currentUser?.uid;
-  }
-
-  getCurrentUser(): User | null {
-    return this.auth.currentUser;
-  }
-
-  constructor() {
-    const app = initializeApp(firebaseConfig);
-    this.auth = getAuth(app);
-    
-    this.auth.onAuthStateChanged((user: User | null) => {
-      this.userSubject.next(user);
+  constructor(private auth: Auth) {
+    onAuthStateChanged(this.auth, (user) => {
+      this.currentUser = user;
     });
   }
 
-  async login(email: string, password: string): Promise<void> {
-    try {
-      await signInWithEmailAndPassword(this.auth, email, password);
-    } catch (error) {
-      throw error;
-    }
+  login(email: string, password: string) {
+    return signInWithEmailAndPassword(this.auth, email, password);
   }
 
-  async register(email: string, password: string): Promise<void> {
-    try {
-      await createUserWithEmailAndPassword(this.auth, email, password);
-    } catch (error) {
-      throw error;
-    }
+  register(email: string, password: string, name: string) {
+    return createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  async logout(): Promise<void> {
-    try {
-      await signOut(this.auth);
-    } catch (error) {
-      throw error;
-    }
+  resetPassword(email: string) {
+    return sendPasswordResetEmail(this.auth, email);
   }
 
-  async resetPassword(email: string): Promise<void> {
-    try {
-      await sendPasswordResetEmail(this.auth, email);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  getUserRole(): string {
-    const user = this.auth.currentUser;
-    // In a real application, you would fetch the user's role from Firestore
-    // For now, we'll return a default role
-    return user ? 'guest' : '';
+  logout() {
+    return signOut(this.auth);
   }
 
   isAuthenticated(): Observable<boolean> {
-    return new Observable(subscriber => {
-      this.auth.onAuthStateChanged((user: User | null) => {
-        subscriber.next(!!user);
+    return new Observable<boolean>(observer => {
+      onAuthStateChanged(this.auth, (user) => {
+        observer.next(!!user);
       });
     });
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUser;
+  }
+
+  getCurrentUserId(): string | null {
+    return this.currentUser?.uid || null;
   }
 }

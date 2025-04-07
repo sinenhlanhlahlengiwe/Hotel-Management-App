@@ -132,7 +132,7 @@ export class RegisterComponent {
     }
 
     try {
-      await this.authService.register(this.email, this.password);
+      await this.authService.register(this.email, this.password, this.name);
       this.router.navigate(['/']);
     } catch (error: any) {
       this.errorMessage = error.message;
